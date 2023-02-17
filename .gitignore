@@ -50,3 +50,43 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Lisp:
+lisp/*.FASL
+lisp/*.fasl
+lisp/*.lisp-temp
+lisp/*.dfsl
+lisp/*.pfsl
+lisp/*.d64fsl
+lisp/*.p64fsl
+lisp/*.lx64fsl
+lisp/*.lx32fsl
+lisp/*.dx64fsl
+lisp/*.dx32fsl
+lisp/*.fx64fsl
+lisp/*.fx32fsl
+lisp/*.sx64fsl
+lisp/*.sx32fsl
+lisp/*.wx64fsl
+lisp/*.wx32fsl
+lisp/part1
+lisp/part2
+
+# Erlang:
+.eunit
+*.o
+*.beam
+*.plt
+erl_crash.dump
+.concrete/DEV_MODE
+
+# rebar 2.x
+.rebar
+rel/example_project
+ebin/*.beam
+deps
+
+# rebar 3
+.rebar3
+_build/
+_checkouts/
