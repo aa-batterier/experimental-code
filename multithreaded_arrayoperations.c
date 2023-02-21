@@ -18,7 +18,7 @@ typedef struct
 
 // Thread functions
 
-void *thr_fn(void *arg)
+void *mappend_thr_fn(void *arg)
 {
         thr_arg *input = (thr_arg*)arg;
         for (int *iterator = input->start; iterator != input->end; iterator++)
@@ -56,7 +56,7 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
                         position = position + splitArray;
                         arg[index].end = &array[position];
                 }
-                pthread_create(&tids[index],NULL,thr_fn,&arg[index]);
+                pthread_create(&tids[index],NULL,mappend_thr_fn,&arg[index]);
         }
         for (int i = 0; i < numberOfThreads; i++)
         {
