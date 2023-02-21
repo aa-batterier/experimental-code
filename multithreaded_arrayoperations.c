@@ -1,5 +1,3 @@
-// To fix: the program get Segmentation fault when threads are defined as more then the amount of the list.
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -35,11 +33,15 @@ void *thr_fn(void *arg)
 // Destructive
 void mappend(int fun (int), int *array, int size, int numberOfThreads)
 {
+        if (numberOfThreads > size)
+        {
+                numberOfThreads = size;
+        }
         pthread_t tids[numberOfThreads];
         int splitArray = size / numberOfThreads,
             remainder = size % numberOfThreads;
         thr_arg arg[numberOfThreads];
-        for (int i = 1, position = 0; i <= numberOfThreads && i <= size; i++)
+        for (int i = 1, position = 0; i <= numberOfThreads; i++)
         {
                 int index = i - 1;
                 arg[index].func = fun;
