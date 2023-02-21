@@ -1,4 +1,4 @@
-// To fix: the program get Segmentation fault when input list is to big.
+// To fix: the program get Segmentation fault when threads are defined as more then the amount of the list.
 
 #include <stdlib.h>
 #include <stdio.h>
