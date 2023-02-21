@@ -31,6 +31,7 @@ void *thr_fn(void *arg)
 
 // Operator functions
 
+// Destructive
 void mappend(int fun (int), int *array, int size)
 {
         pthread_t tids[MAX_THREADS];
@@ -92,7 +93,7 @@ void printArray2(int *start, int *end)
 
 // Main function
 
-const int main(void)
+const int main(const int argc, char **argv)
 {
         int array[] = {1,2,3,4,5,6,7,8,9,10,
                        11,12,13,14,15,16,17,18,19,20,
