@@ -1,14 +1,15 @@
+// To fix: the program get Segmentation fault when input list is to big.
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
 
-#define MAX_THREADS 4
-
 void *thr_fn(void *arg);
-void mappend(int fun (int), int *array, int size);
+void mappend(int fun (int), int *array, int size, int numberOfThreads);
 int timesTwo(int input);
 void printArray(int *array, const int size);
 void printArray2(int *start, int *end);
+void inputToArray(char **input, int *output);
 
 typedef struct
 {
@@ -32,13 +33,13 @@ void *thr_fn(void *arg)
 // Operator functions
 
 // Destructive
-void mappend(int fun (int), int *array, int size)
+void mappend(int fun (int), int *array, int size, int numberOfThreads)
 {
-        pthread_t tids[MAX_THREADS];
-        int splitArray = size / MAX_THREADS,
-            remainder = size % MAX_THREADS;
-        thr_arg arg[MAX_THREADS];
-        for (int i = 1, position = 0; i <= MAX_THREADS && i <= size; i++)
+        pthread_t tids[numberOfThreads];
+        int splitArray = size / numberOfThreads,
+            remainder = size % numberOfThreads;
+        thr_arg arg[numberOfThreads];
+        for (int i = 1, position = 0; i <= numberOfThreads && i <= size; i++)
         {
                 int index = i - 1;
                 arg[index].func = fun;
@@ -55,7 +56,7 @@ void mappend(int fun (int), int *array, int size)
                 }
                 pthread_create(&tids[index],NULL,thr_fn,&arg[index]);
         }
-        for (int i = 0; i < MAX_THREADS; i++)
+        for (int i = 0; i < numberOfThreads; i++)
         {
                 void *rv = NULL;
                 pthread_join(tids[i],&rv);
@@ -91,23 +92,35 @@ void printArray2(int *start, int *end)
         printf("]\n");
 }
 
+void inputToArray(char **input, int *output)
+{
+        int i = 0;
+        for (char **iterator = input; **iterator != ']'; iterator++)
+        {
+                if (**iterator == '[')
+                {
+                        continue;
+                }
+                output[i] = atoi(*iterator);
+                i++;
+        }
+}
+
 // Main function
 
 const int main(const int argc, char **argv)
 {
-        int array[] = {1,2,3,4,5,6,7,8,9,10,
-                       11,12,13,14,15,16,17,18,19,20,
-                       21,22,23,24,25,26,27,28,29,30,
-                       31,32,33,34,35,36,37,38,39,40,
-                       41,42,43,44,45,46,47,48,49,50,
-                       51,52,53,54,55,56,57,58,59,60,
-                       61,62,63,64,65,66,67,68,69,70,
-                       71,72,73,74,75,76,77,78,79,80,
-                       81,82,83,84,85,86,87,88,89,90,
-                       91,92,93,94,95,96,97,98,99,100},
-            size = sizeof(array) / sizeof(array[0]);
-        printArray(array,size);
-        mappend(timesTwo,array,size);
-        printArray(array,size);
+        if ((argc < 3 || argc > 24) && *argv[2] != '[' && *argv[argc - 1] != ']')
+        {
+                fprintf(stderr,"usage: %s <number of threads> <[ <numbers> ... <max amount is 20> ]>\n",argv[0]);
+                exit(0);
+        }
+        int inputSize = argc - 4,
+            inputArray[inputSize],
+            numberOfThreads = atoi(argv[1]);
+        inputToArray(&argv[2],inputArray);
+        printArray(inputArray,inputSize);
+        mappend(timesTwo,inputArray,inputSize,numberOfThreads);
+        printArray(inputArray,inputSize);
         exit(0);
 }
