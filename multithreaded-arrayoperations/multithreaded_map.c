@@ -14,13 +14,13 @@ typedef struct
         int *start,
             *end;
         int (*func) (int);
-} thr_arg;
+} mappend_thr_arg;
 
 // Thread functions
 
 void *mappend_thr_fn(void *arg)
 {
-        thr_arg *input = (thr_arg*)arg;
+        mappend_thr_arg  *input = (mappend_thr_arg*)arg;
         for (int *iterator = input->start; iterator != input->end; iterator++)
         {
                 *iterator = input->func(*iterator);
@@ -40,7 +40,7 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
         pthread_t tids[numberOfThreads];
         int splitArray = size / numberOfThreads,
             remainder = size % numberOfThreads;
-        thr_arg arg[numberOfThreads];
+        mappend_thr_arg arg[numberOfThreads];
         for (int i = 1, position = 0; i <= numberOfThreads; i++)
         {
                 int index = i - 1;
@@ -67,7 +67,7 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
 
 // Send in functions
 
-int timesTwo(int input)
+int timesTwo(const int input)
 {
         return input * 2;
 }
