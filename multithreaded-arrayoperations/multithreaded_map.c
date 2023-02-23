@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-void *thr_fn(void *arg);
+void *mappend_thr_fn(void *arg);
 void mappend(int fun (int), int *array, int size, int numberOfThreads);
 int timesTwo(int input);
 void printArray(int *array, const int size);
