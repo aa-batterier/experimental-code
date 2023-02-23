@@ -49,7 +49,7 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
                 if (i <= remainder)
                 {
                         position = position + splitArray + 1;
-                        arg[index].end = &array[position];
+                        arg[index].end = &array[position]; // Can be put outside the loop.
                 }
                 else
                 {
