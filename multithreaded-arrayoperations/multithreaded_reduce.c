@@ -1,6 +1,19 @@
+/*
+ * The code works like it should, but this reduce can not
+ * handle a list where it is important that every element
+ * is handled in a certain sequens.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+
+void *reduce_thr_fn(void *arg);
+int reduce(int fun (int, int), int *array, int size, int numberOfThreads);
+int sum(int a, int b);
+int difference(int a, int b);
+void printArray(int *array, int size);
+void printArray2(int *start, int *end);
 
 typedef struct
 {
@@ -40,13 +53,12 @@ int reduce(int fun (int, int), int *array, int size, int numberOfThreads)
                 if (i <= remainder)
                 {
                         position = position + splitArray + 1;
-                        arg[index].end = &array[position];
                 }
                 else
                 {
                         position = position + splitArray;
-                        arg[index].end = &array[position];
                 }
+                arg[index].end = &array[position];
                 pthread_create(&tids[index],NULL,reduce_thr_fn,&arg[index]);
         }
         // Make sure all threads have completed.
@@ -56,8 +68,14 @@ int reduce(int fun (int, int), int *array, int size, int numberOfThreads)
                 pthread_join(tids[i],&rv);
         }
         int rtV = fun(*arg[0].returnValue,*arg[1].returnValue);
+        printf("#%d: %d - %d = %d\n",0,*arg[0].start,*arg[0].end,*arg[0].returnValue);
+        printArray2(arg[0].start,arg[0].end);
+        printf("#%d: %d - %d = %d\n",1,*arg[1].start,*arg[1].end,*arg[1].returnValue);
+        printArray2(arg[1].start,arg[1].end);
         for (int i = 2; i < numberOfThreads; i++)
         {
+                printf("#%d: %d - %d = %d\n",i,*arg[i].start,*arg[i].end,*arg[i].returnValue);
+                printArray2(arg[i].start,arg[i].end);
                 rtV = fun(rtV,*arg[i].returnValue);
                 free(arg[i].returnValue);
         }
@@ -67,6 +85,11 @@ int reduce(int fun (int, int), int *array, int size, int numberOfThreads)
 int sum(int a, int b)
 {
         return a + b;
+}
+
+int difference(int a, int b)
+{
+        return a - b;
 }
 
 void printArray(int *array, int size)
@@ -79,13 +102,24 @@ void printArray(int *array, int size)
         printf("]\n");
 }
 
+void printArray2(int *start, int *end)
+{
+        printf("[ ");
+        for (int *iterator = start; iterator != end; iterator++)
+        {
+                printf("%d ",*iterator);
+        }
+        printf("]\n");
+}
+
 int main(void)
 {
         int array[] = {1,2,3,4,5,6,7,8,9},
             size = 9;
         printArray(array,size);
-        int result = reduce(sum,array,size,4);
-        printf("Result of sum: %d\n",result);
-        // Add difference test to se in the input values comes in in the correct order.
+        int sumResult = reduce(sum,array,size,4);
+        printf("Result of sum: %d\n",sumResult);
+        int diffResult = reduce(difference,array,size,4); // Will be wrong.
+        printf("Result of difference: %d\n",diffResult);
         exit(0);
 }

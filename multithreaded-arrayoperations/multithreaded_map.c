@@ -49,13 +49,12 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
                 if (i <= remainder)
                 {
                         position = position + splitArray + 1;
-                        arg[index].end = &array[position]; // Can be put outside the loop.
                 }
                 else
                 {
                         position = position + splitArray;
-                        arg[index].end = &array[position];
                 }
+                arg[index].end = &array[position];
                 pthread_create(&tids[index],NULL,mappend_thr_fn,&arg[index]);
         }
         for (int i = 0; i < numberOfThreads; i++)
