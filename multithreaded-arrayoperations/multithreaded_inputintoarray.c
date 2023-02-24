@@ -1,11 +1,11 @@
-/*
- * Write a multithreaded function which converts input in argv
- * into an array.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+
+void *thr_fn(void *arg);
+void inputToArray(char **input, int *output, int size, int numberOfThreads);
+void printArray(int *array, const int size);
+const int main(const int argc, char **argv);
 
 typedef struct
 {
@@ -37,6 +37,7 @@ void *thr_fn(void *arg)
         pthread_exit(NULL);
 }
 
+// Understand how to correctly handle errors return.
 void inputToArray(char **input, int *output, int size, int numberOfThreads)
 {
         if (numberOfThreads > size)
@@ -75,6 +76,10 @@ void inputToArray(char **input, int *output, int size, int numberOfThreads)
         }
 }
 
+/*
+ * Really understand const, where to use it,
+ * before pointers and values.
+ */
 void printArray(int *array, const int size)
 {
         printf("[ ");
