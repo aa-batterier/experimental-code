@@ -14,6 +14,7 @@ int sum(int a, int b);
 int difference(int a, int b);
 void printArray(int *array, int size);
 void printArray2(int *start, int *end);
+void inputIntoArray(char **input, int *output, int size);
 
 typedef struct
 {
@@ -112,14 +113,35 @@ void printArray2(int *start, int *end)
         printf("]\n");
 }
 
-int main(void)
+void inputIntoArray(char **input, int *output, int size)
 {
-        int array[] = {1,2,3,4,5,6,7,8,9},
-            size = 9;
+        int i = 0;
+        for (char **iterator = input; **iterator != ']'; iterator++)
+        {
+                if (**iterator == '[')
+                {
+                        continue;
+                }
+                output[i] = atoi(*iterator);
+                i++;
+        }
+}
+
+int main(int argc, char **argv)
+{
+        if (argc < 4 || argc > 24 || *argv[2] != '[' || *argv[argc - 1] != ']')
+        {
+                fprintf(stderr,"usage: %s <number of threads> <[ <number> <number> <...max 20> ]>\n",argv[0]);
+                exit(1);
+        }
+        int size = argc - 4,
+            array[size],
+            numberOfThreads = atoi(argv[1]);
+        inputIntoArray(&argv[2],array,size);
         printArray(array,size);
-        int sumResult = reduce(sum,array,size,4);
+        int sumResult = reduce(sum,array,size,numberOfThreads);
         printf("Result of sum: %d\n",sumResult);
-        int diffResult = reduce(difference,array,size,4); // Will be wrong.
+        int diffResult = reduce(difference,array,size,numberOfThreads); // Will be wrong.
         printf("Result of difference: %d\n",diffResult);
         exit(0);
 }
