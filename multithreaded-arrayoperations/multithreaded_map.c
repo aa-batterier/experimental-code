@@ -48,11 +48,11 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
                 arg[index].start = &array[position];
                 if (i <= remainder)
                 {
-                        position = position + splitArray + 1;
+                        position += splitArray + 1;
                 }
                 else
                 {
-                        position = position + splitArray;
+                        position += splitArray;
                 }
                 arg[index].end = &array[position];
                 pthread_create(&tids[index],NULL,mappend_thr_fn,&arg[index]);

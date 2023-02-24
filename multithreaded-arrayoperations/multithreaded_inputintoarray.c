@@ -58,11 +58,11 @@ void inputToArray(char **input, int *output, int size, int numberOfThreads)
                 arg[index].outputStart = &output[position];
                 if (i <= remainder)
                 {
-                        position = position + splitArray + 1;
+                        position += splitArray + 1;
                 }
                 else
                 {
-                        position = position + splitArray;
+                        position += splitArray;
                 }
                 arg[index].inputEnd = &input[position];
                 arg[index].outputEnd = &output[position];

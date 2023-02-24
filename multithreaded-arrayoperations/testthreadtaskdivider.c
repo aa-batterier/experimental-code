@@ -20,14 +20,13 @@ void threaddivider(int *array, int size, int numberOfThreads)
                 int *endPos = NULL;
                 if (i <= remainder)
                 {
-                        position = position + defaultTasks + 1;
-                        endPos = &array[position];
+                        position += defaultTasks + 1;
                 }
                 else
                 {
-                        position = position + defaultTasks;
-                        endPos = &array[position];
+                        position += defaultTasks;
                 }
+                endPos = &array[position];
                 printf("#%d\n",i);
                 printf("%d - %d\n",*startPos,*endPos);
                 printArray(startPos,endPos);
