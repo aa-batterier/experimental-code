@@ -7,8 +7,10 @@ void inputToArray(char **input, int *output, int size, int numberOfThreads);
 void printArray(int *array, const int size);
 const int main(const int argc, char **argv);
 
+// Understand Structs.
 typedef struct
 {
+        // Really understand every aspect of pointers.
         char **inputStart,
              **inputEnd;
         int *outputStart,
@@ -45,6 +47,7 @@ void inputToArray(char **input, int *output, int size, int numberOfThreads)
                 // Understand why and what happen when I do this down below.
                 numberOfThreads = size;
         }
+        // Make sure that integer / integer always result in integer devision.
         int splitArray = size / numberOfThreads,
             remainder = size % numberOfThreads;
         // Understand what every element in the arrays below sets to.
@@ -66,6 +69,7 @@ void inputToArray(char **input, int *output, int size, int numberOfThreads)
                 }
                 arg[index].inputEnd = &input[position];
                 arg[index].outputEnd = &output[position];
+                // Understand function pointers.
                 pthread_create(&tids[index],NULL,thr_fn,&arg[index]);
         }
         // Wait for all the threads.
@@ -104,9 +108,20 @@ const int main(const int argc, char **argv)
                 fprintf(stderr,"usage: %s <number of threads> <[ <number> <number> <...max 20> ]>\n",argv[0]);
                 exit(1);
         }
+        // Really understand the C data types.
         int size = argc - 4,
-            array[size];
-        inputToArray(&argv[3],array,size,atoi(argv[1]));
+            array[size],
+            numberOfThreads = atoi(argv[1]);
+        inputToArray(&argv[3],array,size,numberOfThreads);
         printArray(array,size);
         exit(0);
 }
+
+/*
+ * More stuff to understand:
+ * Bitwise operators
+ * Unions
+ * Enums
+ * Macros
+ * stdlib
+ */
