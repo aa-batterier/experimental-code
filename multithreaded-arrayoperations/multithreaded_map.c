@@ -4,7 +4,9 @@
 
 void *mappend_thr_fn(void *arg);
 void mappend(int fun (int), int *array, int size, int numberOfThreads);
+int *mapcar(int fun (int), int *array, int size, int numberOfThreads);
 int timesTwo(int input);
+void copy(int *input, int *output, int size);
 void printArray(int *array, const int size);
 void printArray2(int *start, int *end);
 void inputToArray(char **input, int *output);
@@ -64,6 +66,15 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
         }
 }
 
+// Non-destructive
+int *mapcar(int fun (int), int *array, int size, int numberOfThreads)
+{
+        int *newArray = (int*)calloc(size,sizeof(int));
+        copy(array,newArray);
+        mappend(fun,newArray,size,numberOfThreads);
+        return newArray;
+}
+
 // Send in functions
 
 int timesTwo(const int input)
@@ -72,6 +83,14 @@ int timesTwo(const int input)
 }
 
 // Helper function
+
+void copy(int *input, int *output, int size)
+{
+        for (int i = 0; i < size; i++)
+        {
+                output[i] = input[i];
+        }
+}
 
 void printArray(int *array, const int size)
 {
