@@ -1,5 +1,6 @@
 -module(multithreaded_map).
--compile(export_all).
+%-compile(export_all).
+-export([map/3]).
 
 map(NumberOfThreads,Function,List) ->
         ParentPid = self(),
