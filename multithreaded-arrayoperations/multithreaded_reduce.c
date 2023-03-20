@@ -20,7 +20,7 @@ typedef struct
 {
         int *start,
             *end,
-            *returnValue;
+            *returnValue,
         int (*func) (int, int);
 } reduce_thr_arg;
 
