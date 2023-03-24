@@ -1,7 +1,54 @@
+/*
+ * Strategi for multithreaded quicksort:
+ * 1. Start by dividing the array according to how many elements there are in
+ *    the array in relation to how many threads are going to sort the array
+ *    (do as you have done in the other multithreaded algorithms you have written).
+ * 2. Send in the subarrays to the threads and in the threads sort the subarrays.
+ * 3. Do a final sort in the main thread on the array.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
+
+// Function declaration
+
+void *thr_sort(void *arg);
+void swap(int *pointA, int *pointB);
+int partition(int *unsorted, int left, int right);
+int partitionWithRandomPivot(int *unsorted, int left, int right);
+void recQsort(int *unsorted, int left, int right);
+void loopQsort(int *unsorted, int left, int right);
+int testQsort(int *sortedArray, int length);
+void argumentsIntoIntArray(char **input, int size, int *output);
+void printArray(int *array, int size);
+
+// Argument to send in to the function the threads are to run.
+
+typedef struct
+{
+        int *start,
+            *end,
+            left,
+            right;
+        /*
+         * Need to rewrite all the quicksort algorithms so they take two pointers,
+         * one pointing to the begining of the array and
+         * one pointing to the end of the array instead of
+         * one pointer pointing only to the end of the array.
+         */
+        void (*func) (int *start, int *end, int left, int right);
+} thr_arg;
+
+// Thread function
+
+void *thr_sort(void *arg)
+{
+        thr_arg *input = (thr_arg*)arg;
+        input->func(input->start,input->end,input->left,input->right);
+        pthread_exit(NULL);
+}
 
 // Quicksort helper functions
 
@@ -31,7 +78,7 @@ int partition(int *unsorted, int left, int right)
         return leftPointer;
 }
 
-int partitionR(int *unsorted, int left, int right)
+int partitionWithRandomPivot(int *unsorted, int left, int right)
 {
         srand(time(NULL));
         swap(&unsorted[left + rand() % (right - left)],&unsorted[right]);
@@ -47,7 +94,7 @@ void recQsort(int *unsorted, int left, int right)
                 return;
         }
         //int p = partition(unsorted, left, right);
-        int p = partitionR(unsorted, left, right);
+        int p = partitionWithRandomPivot(unsorted, left, right);
         recQsort(unsorted,left,p - 1);
         recQsort(unsorted,p + 1, right);
 }
