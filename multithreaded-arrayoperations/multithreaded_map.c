@@ -70,7 +70,7 @@ void mappend(int fun (int), int *array, int size, int numberOfThreads)
 int *mapcar(int fun (int), int *array, int size, int numberOfThreads)
 {
         int *newArray = (int*)calloc(size,sizeof(int));
-        copy(array,newArray);
+        copy(array,newArray,size);
         mappend(fun,newArray,size,numberOfThreads);
         return newArray;
 }
@@ -130,7 +130,7 @@ void inputToArray(char **input, int *output)
 
 const int main(const int argc, char **argv)
 {
-        if ((argc < 4 || argc > 24) && *argv[2] != '[' && *argv[argc - 1] != ']')
+        if (argc < 4 || argc > 24 || *argv[2] != '[' || *argv[argc - 1] != ']')
         {
                 fprintf(stderr,"usage: %s <number of threads> <[ <numbers> ... <max amount is 20> ]>\n",argv[0]);
                 exit(0);
