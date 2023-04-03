@@ -8,8 +8,10 @@
 void *thr_sort(void *arg);
 void multithreadQsort(void qsort (int *, int, int), int *unsorted, int size, int numberOfThreads);
 void swap(int *pointA, int *pointB);
-int partition(int *unsorted, int left, int right);
-int partitionWithRandomPivot(int *unsorted, int left, int right);
+//int partition(int *unsorted, int left, int right);
+int *partition(int *left, int *right);
+//int partitionWithRandomPivot(int *unsorted, int left, int right);
+int *partitionWithRandomPivot(int *unsorted, int left, int right);
 void recQsort(int *unsorted, int left, int right);
 void loopQsort(int *unsorted, int left, int right);
 int testQsort(int *sortedArray, int length);
@@ -84,8 +86,10 @@ void swap(int *pointA, int *pointB)
         *pointB = temp;
 }
 
-int partition(int *unsorted, int left, int right)
+//int partition(int *unsorted, int left, int right)
+int *partition(int *left, int *right)
 {
+        /*
         int leftPointer = left - 1,
             rightPointer = right,
             pivot = unsorted[right];
@@ -101,13 +105,29 @@ int partition(int *unsorted, int left, int right)
         }
         swap(&unsorted[leftPointer],&unsorted[right]);
         return leftPointer;
+        */
+        int *pivot = right;
+        while (1)
+        {
+                while (*(++left) < *pivot);
+                while (*right > 0 && *(--right) > *pivot);
+                if (*left >= *right)
+                {
+                        break;
+                }
+                swap(left,right);
+        }
+        swap(left,pivot);
+        return left;
 }
 
-int partitionWithRandomPivot(int *unsorted, int left, int right)
+//int partitionWithRandomPivot(int *unsorted, int left, int right)
+int *partitionWithRandomPivot(int *unsorted, int left, int right)
 {
         srand(time(NULL));
         swap(&unsorted[left + rand() % (right - left)],&unsorted[right]);
-        return partition(unsorted,left,right);
+        //return partition(unsorted,left,right);
+        return partition(&unsorted[left],&unsorted[right]);
 }
 
 // Quicksort functions
@@ -119,7 +139,7 @@ void recQsort(int *unsorted, int left, int right)
                 return;
         }
         //int p = partition(unsorted, left, right);
-        int p = partitionWithRandomPivot(unsorted, left, right);
+        int *p = partitionWithRandomPivot(unsorted, left, right);
         recQsort(unsorted,left,p - 1);
         recQsort(unsorted,p + 1, right);
 }
@@ -134,7 +154,7 @@ void loopQsort(int *unsorted, int left, int right)
         {
                 right = stack[top--];
                 left = stack[top--];
-                int p = partitionWithRandomPivot(unsorted,left,right);
+                int p = *partitionWithRandomPivot(unsorted,left,right);
                 if (p - 1 > left)
                 {
                         stack[++top] = left;
