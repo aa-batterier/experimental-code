@@ -107,10 +107,17 @@ int *partition(int *left, int *right)
         return leftPointer;
         */
         int *pivot = right;
+        left--;
         while (1)
         {
-                while (*(++left) < *pivot);
-                while (*right > 0 && *(--right) > *pivot);
+                /*
+                 * Under stand what the difference is between *(++pointer) and *++pointer
+                 * and &(++pointer) and &++pointer.
+                 */
+                //while (*(++left) < *pivot);
+                while (*++left < *pivot);
+                //while (*right > 0 && *(--right) > *pivot);
+                while (*right > 0 && *--right > *pivot);
                 if (*left >= *right)
                 {
                         break;
@@ -139,7 +146,7 @@ void recQsort(int *unsorted, int left, int right)
                 return;
         }
         //int p = partition(unsorted, left, right);
-        int *p = partitionWithRandomPivot(unsorted, left, right);
+        int p = *partitionWithRandomPivot(unsorted, left, right);
         recQsort(unsorted,left,p - 1);
         recQsort(unsorted,p + 1, right);
 }
