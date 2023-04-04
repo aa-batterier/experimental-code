@@ -6,14 +6,17 @@
 // Function declaration
 
 void *thr_sort(void *arg);
-void multithreadQsort(void qsort (int *, int, int), int *unsorted, int size, int numberOfThreads);
+//void multithreadQsort(void qsort (int *, int, int), int *unsorted, int size, int numberOfThreads);
+void multithreadQsort(void qsort (int *, int*), int *unsorted, int size, int numberOfThreads);
 void swap(int *pointA, int *pointB);
 //int partition(int *unsorted, int left, int right);
 int *partition(int *left, int *right);
 //int partitionWithRandomPivot(int *unsorted, int left, int right);
-int *partitionWithRandomPivot(int *unsorted, int left, int right);
-void recQsort(int *unsorted, int left, int right);
-void loopQsort(int *unsorted, int left, int right);
+int *partitionWithRandomPivot(int *left, int *right);
+//void recQsort(int *unsorted, int left, int right);
+void recQsort(int *left, int *right);
+//void loopQsort(int *unsorted, int left, int right);
+void loopQsort(int *left, int *right);
 int testQsort(int *sortedArray, int length);
 void argumentsIntoIntArray(char **input, int size, int *output);
 void printArray(int *array, int size);
@@ -22,15 +25,20 @@ void printArray(int *array, int size);
 
 typedef struct
 {
+        /*
         int *list,
             left,
             right;
+        */
+        int *left,
+            *right;
         /*
          * 'right' is the same as 'end' - pointer.
          * Maybe a nicer solution is to replace the intgers left and right
          * with pointers.
          */
-        void (*func) (int *start, int left, int right);
+        //void (*func) (int *start, int left, int right);
+        void (*func) (int *left, int *right);
 } thr_arg;
 
 // Thread functions
@@ -38,11 +46,13 @@ typedef struct
 void *thr_sort(void *arg)
 {
         thr_arg *input = (thr_arg*)arg;
-        input->func(input->list,input->left,input->right);
+        //input->func(input->list,input->left,input->right);
+        input->func(input->left,input->right);
         pthread_exit(NULL);
 }
 
-void multithreadQsort(void qsort (int*, int, int), int *unsorted, int size, int numberOfThreads)
+//void multithreadQsort(void qsort (int*, int, int), int *unsorted, int size, int numberOfThreads)
+void multithreadQsort(void qsort (int*, int*), int *unsorted, int size, int numberOfThreads)
 {
         if (numberOfThreads > size)
         {
@@ -56,8 +66,9 @@ void multithreadQsort(void qsort (int*, int, int), int *unsorted, int size, int 
         {
                 int index = i - 1;
                 arg[index].func = qsort;
-                arg[index].list = &unsorted[position];
-                arg[index].left = position;
+                //arg[index].list = &unsorted[position];
+                //arg[index].left = position;
+                arg[index].left = &unsorted[position];
                 if (i <= remainder)
                 {
                         position += splitArray + 1;
@@ -66,7 +77,7 @@ void multithreadQsort(void qsort (int*, int, int), int *unsorted, int size, int 
                 {
                         position += splitArray;
                 }
-                arg[index].right = position - 1;
+                arg[index].right = &unsorted[position - 1];
                 pthread_create(&tids[index],NULL,thr_sort,&arg[index]);
         }
         for (int i = 0; i < numberOfThreads; i++)
@@ -74,7 +85,8 @@ void multithreadQsort(void qsort (int*, int, int), int *unsorted, int size, int 
                 void *rv = NULL;
                 pthread_join(tids[i],&rv);
         }
-        qsort(unsorted,0,size - 1);
+        //qsort(unsorted,0,size - 1);
+        qsort(&unsorted[0],&unsorted[size - 1]);
 }
 
 // Quicksort helper functions
@@ -118,7 +130,7 @@ int *partition(int *left, int *right)
                 while (*++left < *pivot);
                 //while (*right > 0 && *(--right) > *pivot);
                 while (*right > 0 && *--right > *pivot);
-                if (*left >= *right)
+                if (left >= right)
                 {
                         break;
                 }
@@ -129,31 +141,36 @@ int *partition(int *left, int *right)
 }
 
 //int partitionWithRandomPivot(int *unsorted, int left, int right)
-int *partitionWithRandomPivot(int *unsorted, int left, int right)
+int *partitionWithRandomPivot(int *left, int *right)
 {
         srand(time(NULL));
-        swap(&unsorted[left + rand() % (right - left)],&unsorted[right]);
+        //swap(&unsorted[left + rand() % (right - left)],&unsorted[right]);
+        swap(left + rand() % (right - left),right);
         //return partition(unsorted,left,right);
-        return partition(&unsorted[left],&unsorted[right]);
+        return partition(left,right);
 }
 
 // Quicksort functions
 
-void recQsort(int *unsorted, int left, int right)
+//void recQsort(int *unsorted, int left, int right)
+void recQsort(int *left, int *right)
 {
         if (right - left <= 0)
         {
                 return;
         }
         //int p = partition(unsorted, left, right);
-        int p = *partitionWithRandomPivot(unsorted, left, right);
-        recQsort(unsorted,left,p - 1);
-        recQsort(unsorted,p + 1, right);
+        int *p = partitionWithRandomPivot(left, right);
+        //recQsort(unsorted,left,p - 1);
+        recQsort(left,p - 1);
+        //recQsort(unsorted,p + 1, right);
+        recQsort(p + 1, right);
 }
 
-void loopQsort(int *unsorted, int left, int right)
+//void loopQsort(int *unsorted, int left, int right)
+void loopQsort(int *left, int *right)
 {
-        int stack[right - left + 1],
+        int *stack[right - left + 1],
             top = -1;
         stack[++top] = left;
         stack[++top] = right;
@@ -161,7 +178,7 @@ void loopQsort(int *unsorted, int left, int right)
         {
                 right = stack[top--];
                 left = stack[top--];
-                int p = *partitionWithRandomPivot(unsorted,left,right);
+                int *p = partitionWithRandomPivot(left,right);
                 if (p - 1 > left)
                 {
                         stack[++top] = left;
@@ -228,7 +245,8 @@ int main(int argc, char *argv[])
         printf("Unsorted array: ");
         printArray(unsortedRec,length);
 
-        recQsort(unsortedRec,0,length - 1);
+        //recQsort(unsortedRec,0,length - 1);
+        recQsort(unsortedRec,&unsortedRec[length - 1]);
         printf("Recursively sorted array: ");
         printArray(unsortedRec,length);
         if (testQsort(unsortedRec,length))
@@ -240,7 +258,8 @@ int main(int argc, char *argv[])
                 printf("testQsort: Fail\n");
         }
 
-        loopQsort(unsortedLoop,0,length - 1);
+        //loopQsort(unsortedLoop,0,length - 1);
+        loopQsort(unsortedLoop,&unsortedLoop[length - 1]);
         printf("Iterative sorted array: ");
         printArray(unsortedLoop,length);
         if (testQsort(unsortedLoop,length))
