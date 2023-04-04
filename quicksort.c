@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <pthread.h>
 
@@ -17,7 +18,8 @@ int *partitionWithRandomPivot(int *left, int *right);
 void recQsort(int *left, int *right);
 //void loopQsort(int *unsorted, int left, int right);
 void loopQsort(int *left, int *right);
-int testQsort(int *sortedArray, int length);
+int testQsort(int *sortedArray, int *originalArray, int length);
+int isInArray(int member, int *array, int length);
 void argumentsIntoIntArray(char **input, int size, int *output);
 void printArray(int *array, int size);
 
@@ -32,11 +34,6 @@ typedef struct
         */
         int *left,
             *right;
-        /*
-         * 'right' is the same as 'end' - pointer.
-         * Maybe a nicer solution is to replace the intgers left and right
-         * with pointers.
-         */
         //void (*func) (int *start, int left, int right);
         void (*func) (int *left, int *right);
 } thr_arg;
@@ -160,6 +157,8 @@ void recQsort(int *left, int *right)
                 return;
         }
         //int p = partition(unsorted, left, right);
+        //int *p = partition(unsorted, left, right);
+        //int p = partitionWithRandomPivot(left, right);
         int *p = partitionWithRandomPivot(left, right);
         //recQsort(unsorted,left,p - 1);
         recQsort(left,p - 1);
@@ -178,6 +177,13 @@ void loopQsort(int *left, int *right)
         {
                 right = stack[top--];
                 left = stack[top--];
+                if (right == left)
+                {
+                        return;
+                }
+                //int p = partition(left,right);
+                //int *p = partition(left,right);
+                //int p = partitionWithRandomPivot(left,right);
                 int *p = partitionWithRandomPivot(left,right);
                 if (p - 1 > left)
                 {
@@ -194,11 +200,15 @@ void loopQsort(int *left, int *right)
 
 // Test function
 
-int testQsort(int *sortedArray, int length)
+int testQsort(int *sortedArray, int *originalArray, int length)
 {
+        if (!isInArray(sortedArray[0],originalArray,length))
+        {
+                return 0;
+        }
         for (int h = 0, i = 1; i < length; i++, h++)
         {
-                if (sortedArray[h] > sortedArray[i])
+                if (sortedArray[h] > sortedArray[i] || !isInArray(sortedArray[0],originalArray,length))
                 {
                         return 0;
                 }
@@ -206,8 +216,21 @@ int testQsort(int *sortedArray, int length)
         return 1;
 }
 
+int isInArray(int member, int *array, int length)
+{
+        for (int i = 0; i < length; i++)
+        {
+                if (member == array[i])
+                {
+                        return 1;
+                }
+        }
+        return 0;
+}
+
 // Helper functions
 
+// TODO: Make this function multithreaded.
 void argumentsIntoIntArray(char **input, int size, int *output)
 {
         for (int i = 0; i < size; i++)
@@ -230,18 +253,26 @@ void printArray(int *array, int size)
 
 int main(int argc, char *argv[])
 {
-        if (argc < 2 || argc > 21)
+        if (argc < 2 || argc > 21 || strcmp(argv[2],"[") != 0 || strcmp(argv[argc - 1],"]") != 0)
         {
-                fprintf(stderr,"usage %s <number> <number> ... up to 20 numbers\n",argv[0]);
+                fprintf(stderr,"usage %s <number of threads> [ <number> <number> ... up to 20 numbers ]\n",argv[0]);
                 exit(1);
         }
-        int length = argc - 1,
+
+        char **inputArray = argv + 3;
+        int length = argc - 4,
+            threads = atoi(argv[1]),
+            originalArray[length],
             unsortedRec[length],
             unsortedLoop[length],
             unsortedMultithread[length];
-        argumentsIntoIntArray(argv + 1,length,unsortedRec);
-        argumentsIntoIntArray(argv + 1,length,unsortedLoop);
-        argumentsIntoIntArray(argv + 1,length,unsortedMultithread);
+
+        // TODO: Run all of these in sperate threads.
+        argumentsIntoIntArray(inputArray,length,originalArray);
+        argumentsIntoIntArray(inputArray,length,unsortedRec);
+        argumentsIntoIntArray(inputArray,length,unsortedLoop);
+        argumentsIntoIntArray(inputArray,length,unsortedMultithread);
+
         printf("Unsorted array: ");
         printArray(unsortedRec,length);
 
@@ -249,7 +280,7 @@ int main(int argc, char *argv[])
         recQsort(unsortedRec,&unsortedRec[length - 1]);
         printf("Recursively sorted array: ");
         printArray(unsortedRec,length);
-        if (testQsort(unsortedRec,length))
+        if (testQsort(unsortedRec,originalArray,length))
         {
                 printf("testQsort: Pass\n");
         }
@@ -262,7 +293,7 @@ int main(int argc, char *argv[])
         loopQsort(unsortedLoop,&unsortedLoop[length - 1]);
         printf("Iterative sorted array: ");
         printArray(unsortedLoop,length);
-        if (testQsort(unsortedLoop,length))
+        if (testQsort(unsortedLoop,originalArray,length))
         {
                 printf("testQsort: Pass\n");
         }
@@ -271,10 +302,10 @@ int main(int argc, char *argv[])
                 printf("testQsort: Fail\n");
         }
 
-        multithreadQsort(recQsort,unsortedMultithread,length, 4);
+        multithreadQsort(recQsort,unsortedMultithread,length,threads);
         printf("Multithreaded quicksorted array: ");
         printArray(unsortedMultithread,length);
-        if (testQsort(unsortedMultithread,length))
+        if (testQsort(unsortedMultithread,originalArray,length))
         {
                 printf("testQsort: Pass\n");
         }
