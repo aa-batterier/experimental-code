@@ -20,6 +20,7 @@ void recQsort(int *left, int *right);
 void loopQsort(int *left, int *right);
 int testQsort(int *sortedArray, int *originalArray, int length);
 int isInArray(int member, int *array, int length);
+void *thr_atoi(void *arg);
 //void argumentsIntoIntArray(char **input, int size, int *output);
 void *argumentsIntoIntArray(void *arg);
 void printArray(int *array, int size);
@@ -43,8 +44,17 @@ typedef struct
 {
         char **input;
         int *output,
-            size;
+            size,
+            numberOfThreads;
 } io_arg;
+
+typedef struct
+{
+        char **inputStart,
+             **inputEnd;
+        int *outputStart,
+            *outputEnd;
+} arrToInt_arg;
 
 // Thread functions
 
@@ -206,7 +216,7 @@ void loopQsort(int *left, int *right)
         }
 }
 
-// Test function
+// Uint test function
 
 int testQsort(int *sortedArray, int *originalArray, int length)
 {
@@ -238,13 +248,50 @@ int isInArray(int member, int *array, int length)
 
 // Helper functions
 
+void *thr_atoi(void *arg)
+{
+        arrToInt_arg *argument = (arrToInt_arg*)arg;
+        char **input = argument->inputStart;
+        for (int *output = argument->outputStart; output <= argument->outputEnd; input++, output++)
+        {
+                *output = atoi(*input);
+        }
+        pthread_exit(NULL);
+}
+
 //void argumentsIntoIntArray(char **input, int size, int *output);
 void *argumentsIntoIntArray(void *arg)
 {
         io_arg *argument = (io_arg*)arg;
-        for (int i = 0; i < argument->size; i++)
+        if (argument->numberOfThreads > argument->size)
         {
-                argument->output[i] = atoi(argument->input[i]);
+                argument->numberOfThreads = argument->size;
+        }
+        int splitArray = argument->size / argument->numberOfThreads,
+            remainder = argument->size % argument->numberOfThreads;
+        pthread_t tids[argument->numberOfThreads];
+        arrToInt_arg thr_arg[argument->numberOfThreads];
+        for (int i = 1, position = 0; i <= argument->numberOfThreads; i++)
+        {
+                int index = i - 1;
+                thr_arg[index].inputStart = &argument->input[position];
+                thr_arg[index].outputStart = &argument->output[position];
+                if (i <= remainder)
+                {
+                        position += splitArray + 1;
+                }
+                else
+                {
+                        position += splitArray;
+                }
+                thr_arg[index].inputEnd = &argument->input[position - 1];
+                thr_arg[index].outputEnd = &argument->output[position - 1];
+                pthread_create(&tids[index],NULL,thr_atoi,&thr_arg[index]);
+        }
+        for (int i = 0; i < argument->numberOfThreads; i++)
+        {
+                void *rv = NULL;
+                pthread_join(tids[i],&rv);
         }
         pthread_exit(NULL);
 }
@@ -277,10 +324,10 @@ int main(int argc, char *argv[])
             unsortedLoop[length],
             unsortedMultithread[length];
         pthread_t tids[4];
-        io_arg arg[4] = {{inputArray,originalArray,length}
-                        ,{inputArray,unsortedRec,length}
-                        ,{inputArray,unsortedLoop,length}
-                        ,{inputArray,unsortedMultithread,length}};
+        io_arg arg[4] = {{inputArray,originalArray,length,threads}
+                        ,{inputArray,unsortedRec,length,threads}
+                        ,{inputArray,unsortedLoop,length,threads}
+                        ,{inputArray,unsortedMultithread,length,threads}};
 
         /*
         argumentsIntoIntArray(inputArray,length,originalArray);
