@@ -103,7 +103,7 @@ void printArray(int *array, const int size)
  */
 const int main(const int argc, char **argv)
 {
-        if (argc < 4 || argc > 24 || *argv[2] != '[' || *argv[argc - 1] != ']')
+        if (argc < 4 || argc > 24 || strcmp(argv[2],"[") != 0 || strcmp(argv[argc - 1],"]") != 0)
         {
                 fprintf(stderr,"usage: %s <number of threads> <[ <number> <number> <...max 20> ]>\n",argv[0]);
                 exit(1);
