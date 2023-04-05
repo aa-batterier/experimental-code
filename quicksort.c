@@ -20,7 +20,8 @@ void recQsort(int *left, int *right);
 void loopQsort(int *left, int *right);
 int testQsort(int *sortedArray, int *originalArray, int length);
 int isInArray(int member, int *array, int length);
-void argumentsIntoIntArray(char **input, int size, int *output);
+//void argumentsIntoIntArray(char **input, int size, int *output);
+void *argumentsIntoIntArray(void *arg);
 void printArray(int *array, int size);
 
 // Argument to send in to the function the threads are to run.
@@ -36,13 +37,20 @@ typedef struct
             *right;
         //void (*func) (int *start, int left, int right);
         void (*func) (int *left, int *right);
-} thr_arg;
+} qsort_arg;
+
+typedef struct
+{
+        char **input;
+        int *output,
+            size;
+} io_arg;
 
 // Thread functions
 
 void *thr_sort(void *arg)
 {
-        thr_arg *input = (thr_arg*)arg;
+        qsort_arg *input = (qsort_arg*)arg;
         //input->func(input->list,input->left,input->right);
         input->func(input->left,input->right);
         pthread_exit(NULL);
@@ -58,7 +66,7 @@ void multithreadQsort(void qsort (int*, int*), int *unsorted, int size, int numb
         int splitArray = size / numberOfThreads,
             remainder = size % numberOfThreads;
         pthread_t tids[numberOfThreads];
-        thr_arg arg[numberOfThreads];
+        qsort_arg arg[numberOfThreads];
         for (int i = 1, position = 0; i <= numberOfThreads; i++)
         {
                 int index = i - 1;
@@ -230,13 +238,15 @@ int isInArray(int member, int *array, int length)
 
 // Helper functions
 
-// TODO: Make this function multithreaded.
-void argumentsIntoIntArray(char **input, int size, int *output)
+//void argumentsIntoIntArray(char **input, int size, int *output);
+void *argumentsIntoIntArray(void *arg)
 {
-        for (int i = 0; i < size; i++)
+        io_arg *argument = (io_arg*)arg;
+        for (int i = 0; i < argument->size; i++)
         {
-                output[i] = atoi(input[i]);
+                argument->output[i] = atoi(argument->input[i]);
         }
+        pthread_exit(NULL);
 }
 
 void printArray(int *array, int size)
@@ -266,12 +276,28 @@ int main(int argc, char *argv[])
             unsortedRec[length],
             unsortedLoop[length],
             unsortedMultithread[length];
+        pthread_t tids[4];
+        io_arg arg[4] = {{inputArray,originalArray,length}
+                        ,{inputArray,unsortedRec,length}
+                        ,{inputArray,unsortedLoop,length}
+                        ,{inputArray,unsortedMultithread,length}};
 
-        // TODO: Run all of these in sperate threads.
+        /*
         argumentsIntoIntArray(inputArray,length,originalArray);
         argumentsIntoIntArray(inputArray,length,unsortedRec);
         argumentsIntoIntArray(inputArray,length,unsortedLoop);
         argumentsIntoIntArray(inputArray,length,unsortedMultithread);
+        */
+        for (int i = 0; i < 4; i++)
+        {
+                pthread_create(&tids[i],NULL,argumentsIntoIntArray,&arg[i]);
+        }
+        // Waiting for all the threads to be finnished before moving on.
+        for (int i = 0; i < 4; i++)
+        {
+                void *rv = NULL;
+                pthread_join(tids[i],&rv);
+        }
 
         printf("Unsorted array: ");
         printArray(unsortedRec,length);
